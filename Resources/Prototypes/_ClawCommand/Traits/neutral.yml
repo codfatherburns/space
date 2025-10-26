@@ -4,7 +4,7 @@
 - type: trait
   id: PunkAccent
   category: TraitsSpeechAccents
-  slots: 0
+  slots: 1
   requirements:
     - !type:CharacterItemGroupRequirement
       group: TraitsAccents
