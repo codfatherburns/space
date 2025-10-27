@@ -4,7 +4,7 @@
 
 ---
 
-Floof Station is a whitelist-only 18+ Medium Roleplay furry-oriented server (ERP enabled), of the game [Space Station 14](https://spacestation14.com/). Anybody interested in checking us out or joining us, can apply for membership in our Discord linked down below.
+Claw Command is a 18+ light to medium roleplay furry-enabled server (ERP also enabled), of the game [Space Station 14](https://spacestation14.com/). Anybody interested in checking us out or joining us, can apply for membership in our Discord linked down below.
 
 Floof Station is a relaxing environment offering slow-paced, admin-driven events where members can develop their stories. The focus is on building meaningful interpersonal relationships, from friendships to romantic connections. This includes erotic roleplay, allowing members to explore and bring their wildest fantasies to life, all within a framework of mutual respect and consent.
 
@@ -14,7 +14,7 @@ Floof Station is a fork of [Einstein-Engines](https://github.com/Simple-Station/
 
 [Steam (WizDen Launcher)](https://store.steampowered.com/app/1255460/Space_Station_14/) (NOTE: in order to see us on the Hub, you will have to opt-in seeing 18+ servers in the filters!)
 
-[Discord](https://discord.com/invite/floofstation) (NOTE: in order to access to the rest of the Discord, you will have to be whitelisted first!)
+[Discord](https://discord.gg/Bj5DjEJNPq) (NOTE: in order to access to the rest of the Discord, you will have to be whitelisted first!)
 
 [Wiki](https://wiki.floofstation.com/index.php/Main_Page) (NOTE: you will need a SS14 account in order to access the Wiki!)
 
