@@ -58,6 +58,8 @@
     - type: trait
       id: PirateAccent
     - type: trait
+      id: PunkAccent
+    - type: trait
       id: Accentless
     - type: trait
       id: Southern

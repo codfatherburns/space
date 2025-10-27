@@ -1,7 +1,8 @@
 - type: trait
   id: PirateAccent
   category: TraitsSpeechAccents
-  slots: 1
+  points: 1
+  slots: 0
   requirements:
     - !type:CharacterItemGroupRequirement
       group: TraitsAccents

@@ -191,7 +191,7 @@
   parent: BaseSignDirectional
   id: SignDirectionalSci
   name: science sign # DeltaV - Epistemics Department replacing Science
-  description: A direction sign, pointing out which way the Epistemics department is. # DeltaV - Epistemics Department replacing Science
+  description: A direction sign, pointing out which way the Science department is. # DeltaV - Epistemics Department replacing Science
   components:
   - type: Sprite
     state: direction_sci
