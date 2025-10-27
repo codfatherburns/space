@@ -1,6 +1,6 @@
-# Floof Station
+# Claw Command Station
 
-<p align="center"><img src="https://raw.githubusercontent.com/Fansana/floofstation1/master/Resources/Textures/Logo/flooflogo.png" width="512px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Claw-Command14/space/master/Resources/Textures/Logo/flooflogo.png" width="512px" /></p>
 
 ---
 
