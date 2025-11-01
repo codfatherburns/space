@@ -34,9 +34,10 @@
           Musician: [ 1, 1]
           Mime: [ 1, 1 ]
           Captain: [ 1, 1 ]
-          #BlueshieldOfficer: [ 1, 1] Floof - uncomment once implemented on Floof maps
-          #NanotrasenRepresentative: [ 1, 1 ] Floof - uncomment once implemented on Floof maps
-          #AdministrativeAssistant: [ 1, 1 ] Floof - uncomment once implemented on Floof maps
+          BlueshieldOfficer: [ 1, 1] #Floof - uncomment once implemented on Floof maps
+          BlueshieldMaid: [ 1, 1] #Floof - uncomment once implemented on Floof maps
+          NanotrasenRepresentative: [ 1, 1 ] #Floof - uncomment once implemented on Floof maps
+          AdministrativeAssistant: [ 1, 1 ] #Floof - uncomment once implemented on Floof maps
           Librarian: [ 1, 1 ]
           HeadOfPersonnel: [ 1, 1 ]
           #Engineering

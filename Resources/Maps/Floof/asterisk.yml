@@ -5369,7 +5369,7 @@ entities:
       pos: 16.5,-21.5
       parent: 2
     - type: Door
-      secondsUntilStateChange: -1859.333
+      secondsUntilStateChange: -2721.36
       state: Opening
     - type: DeviceLinkSource
       lastSignals:
@@ -7330,19 +7330,19 @@ entities:
     - type: Transform
       pos: 4.5,-25.5
       parent: 2
-- proto: BenchParkRight
-  entities:
-  - uid: 1477
-    components:
-    - type: Transform
-      pos: -44.5,-8.5
-      parent: 2
 - proto: BenchParkLeft
   entities:
   - uid: 3380
     components:
     - type: Transform
       pos: -45.5,-8.5
+      parent: 2
+- proto: BenchParkRight
+  entities:
+  - uid: 1477
+    components:
+    - type: Transform
+      pos: -44.5,-8.5
       parent: 2
 - proto: BenchPewLeft
   entities:
@@ -7468,28 +7468,6 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -35.5,-12.5
       parent: 2
-- proto: BenchSofaCorpRight
-  entities:
-  - uid: 3733
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: -7.5,-24.5
-      parent: 2
-  - uid: 4647
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 45.5,-0.5
-      parent: 2
-- proto: BenchSofaCorpMiddle
-  entities:
-  - uid: 3735
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: -7.5,-25.5
-      parent: 2
 - proto: BenchSofaCorpLeft
   entities:
   - uid: 3734
@@ -7503,6 +7481,28 @@ entities:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 46.5,-0.5
+      parent: 2
+- proto: BenchSofaCorpMiddle
+  entities:
+  - uid: 3735
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: -7.5,-25.5
+      parent: 2
+- proto: BenchSofaCorpRight
+  entities:
+  - uid: 3733
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: -7.5,-24.5
+      parent: 2
+  - uid: 4647
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 45.5,-0.5
       parent: 2
 - proto: BenchSofaLeft
   entities:
@@ -28068,6 +28068,13 @@ entities:
     components:
     - type: Transform
       pos: -46.5,22.5
+      parent: 2
+- proto: DebugGenerator
+  entities:
+  - uid: 11982
+    components:
+    - type: Transform
+      pos: 28.5,7.5
       parent: 2
 - proto: DefaultStationBeaconAME
   entities:
@@ -60834,6 +60841,13 @@ entities:
     - type: Transform
       pos: -35.5,-21.5
       parent: 2
+- proto: SpawnPointAdminAssistant
+  entities:
+  - uid: 11979
+    components:
+    - type: Transform
+      pos: 46.5,-12.5
+      parent: 2
 - proto: SpawnPointAtmos
   entities:
   - uid: 10897
@@ -60857,6 +60871,30 @@ entities:
     components:
     - type: Transform
       pos: 12.5,-23.5
+      parent: 2
+- proto: SpawnPointBlueshieldMaid
+  entities:
+  - uid: 11975
+    components:
+    - type: Transform
+      pos: -11.5,-1.5
+      parent: 2
+  - uid: 11976
+    components:
+    - type: Transform
+      pos: -12.5,-0.5
+      parent: 2
+- proto: SpawnPointBlueshieldOfficer
+  entities:
+  - uid: 11977
+    components:
+    - type: Transform
+      pos: -31.5,6.5
+      parent: 2
+  - uid: 11978
+    components:
+    - type: Transform
+      pos: 49.5,-12.5
       parent: 2
 - proto: SpawnPointBorg
   entities:
@@ -61128,6 +61166,13 @@ entities:
     - type: Transform
       pos: -12.5,14.5
       parent: 2
+- proto: SpawnPointMagistrate
+  entities:
+  - uid: 11981
+    components:
+    - type: Transform
+      pos: -38.5,-1.5
+      parent: 2
 - proto: SpawnPointMailCarrier
   entities:
   - uid: 9983
@@ -61202,6 +61247,13 @@ entities:
     components:
     - type: Transform
       pos: 2.5,-28.5
+      parent: 2
+- proto: SpawnPointNanotrasenRepresentative
+  entities:
+  - uid: 11980
+    components:
+    - type: Transform
+      pos: 46.5,-9.5
       parent: 2
 - proto: SpawnPointObserver
   entities:
