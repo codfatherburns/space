@@ -14,6 +14,8 @@
       id: LoadoutClothingBlueshieldArmoredJacket
     - type: loadout
       id: LoadoutClothingBlueshieldArmoredCowboyJacket
+    - type: loadout
+      id: LoadoutClothingBlueshieldMaidDuraVest
 
 - type: characterItemGroup
   id: LoadoutBlueshieldMaidUniforms

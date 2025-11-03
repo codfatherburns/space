@@ -11,6 +11,7 @@
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - ClothingBackpackBlueshield
 
@@ -44,6 +45,7 @@
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - ClothingBlueshieldArmoredJacket
 
@@ -58,6 +60,7 @@
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - ClothingBlueshieldArmoredCowboyJacket
 
@@ -75,6 +78,7 @@
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - ClothingUniformJumpskirtBlueshieldOfficer
 
@@ -89,5 +93,6 @@
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - ClothingUniformJumpsuitBlueshieldOfficer

@@ -34,7 +34,7 @@
 
 # Outer
 - type: loadout
-  id: LoadoutClothingBlueshieldMaidArmoredCowboyJacket
+  id: LoadoutClothingBlueshieldMaidDuraVest
   category: JobsCommandBlueshieldMaid
   cost: 0
   exclusive: true
