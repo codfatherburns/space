@@ -23,6 +23,7 @@ using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
+using Content.Shared.Silicons.StationAi;
 
 namespace Content.Server.GameTicking
 {
@@ -30,6 +31,12 @@ namespace Content.Server.GameTicking
     {
         [Dependency] private readonly IAdminManager _adminManager = default!;
         [Dependency] private readonly SharedJobSystem _jobs = default!;
+
+        [Dependency] private readonly IEntityManager _entity = default!;
+        [Dependency] private readonly IPrototypeManager _proto = default!;
+
+        [ValidatePrototypeId<EntityPrototype>]
+        private static readonly EntProtoId DefaultAi = "StationAiBrain";
 
         [ValidatePrototypeId<EntityPrototype>]
         public const string ObserverPrototypeName = "MobObserver";
@@ -258,7 +265,36 @@ namespace Content.Server.GameTicking
             var mob = mobMaybe!.Value;
 
             _stationSpawning.EquipJobName(mob, jobPrototype);
+
+
             _mind.TransferTo(newMind, mob);
+            // Claw Command
+            var found = true;
+            if (job.Prototype == "StationAi")
+            {
+                var entities = _entity.EntityQueryEnumerator<StationAiCoreComponent>();
+
+                while (entities.MoveNext(out var aiEntity, out var stationAiCoreComponent))
+                {
+                    var brain = SpawnInContainerOrDrop(DefaultAi, aiEntity, StationAiCoreComponent.Container);
+
+                    _mind.ControlMob(mob, brain);
+                    _chatSystem.DispatchStationAnnouncement(station, "Station AI {$character} has been installed.");
+                    break;
+                }
+
+                if (found)
+                {
+                    return;
+                }
+                else
+                {
+                    _adminLogger.Add(LogType.LateJoin,
+                    LogImpact.High,
+                    $"Player {player.Name} late joined as {character.Name:characterName} on station {Name(station):stationName} with {ToPrettyString(mob):entity} as a {jobName:jobName}. However no station AI core existed so they are spawned into the void. Please respawn them.");
+                }
+
+            }
 
             if (lateJoin && !silent)
             {
@@ -268,11 +304,6 @@ namespace Content.Server.GameTicking
                         ("job", CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobName))),
                     Loc.GetString("latejoin-arrival-sender"),
                     playDefaultSound: false);
-            }
-
-            if (player.UserId == new Guid("{e887eb93-f503-4b65-95b6-2f282c014192}"))
-            {
-                EntityManager.AddComponent<OwOAccentComponent>(mob);
             }
 
             _stationJobs.TryAssignJob(station, jobPrototype, player.UserId);

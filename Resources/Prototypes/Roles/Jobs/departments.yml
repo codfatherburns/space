@@ -140,7 +140,7 @@
   color: "#D381C9"
   roles:
   - Borg
-  #- StationAi # claw command
+  - StationAi # claw command
 
 # Floof section - Remove station-specific job pseudo-department
 #- type: department

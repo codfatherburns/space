@@ -76,4 +76,4 @@
             Lawyer: [ 2, 2 ] #FloofStation
             Prosecutor: [ 1, 1 ] #FloofStation
             #silicon
-            #StationAi: [ 1, 1 ]
+            StationAi: [ 1, 1 ]

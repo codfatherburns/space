@@ -77,5 +77,5 @@
           Reporter: [ 1, 1 ]
           Anomaly: [ 4, 4 ] # Floofstation
           # #silicon
-          #StationAi: [ 1, 1 ]
+          StationAi: [ 1, 1 ]
           Borg: [ 3, 3 ]

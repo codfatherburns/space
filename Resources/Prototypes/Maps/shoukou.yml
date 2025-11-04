@@ -85,5 +85,5 @@
           MailCarrier: [ 2, 2 ]
           CargoTechnician: [ 3, 3 ]
           #silicon
-          #StationAi: [ 1, 1 ]
+          StationAi: [ 1, 1 ]
 

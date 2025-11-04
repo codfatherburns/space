@@ -15,6 +15,7 @@
   nameDataset: NamesAI
   spawnLoadout: false
   applyTraits: false
+  alwaysUseSpawner: true
 
 - type: job
   id: Borg
