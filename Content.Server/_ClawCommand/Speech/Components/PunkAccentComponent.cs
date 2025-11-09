@@ -10,7 +10,7 @@ public sealed partial class PunkAccentComponent : Component
 {
     [ViewVariables(VVAccess.ReadWrite)]
     [DataField("yarrChance")]
-    public float YarrChance = 0.25f;
+    public float YarrChance = 0.10f;
 
     [ViewVariables]
     public readonly List<string> PunkWords = new()

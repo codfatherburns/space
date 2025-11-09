@@ -72,7 +72,7 @@
   description: department-Dignitary-description
   color: "#33FE6D"
   roles:
-  #- BlueshieldOfficer # Goobstation
+  #-  # Goobstation
   - NanotrasenRepresentative # Goobstation
   - Magistrate # Goobstation
   #- BlueshieldMaid # Claw Command
