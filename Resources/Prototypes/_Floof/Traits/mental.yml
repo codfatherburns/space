@@ -1,8 +1,7 @@
 - type: trait
   id: HypnoticGaze
   category: Mental
-  points: 0
-  slots: 0
+  points: -2
   functions:
   - !type:TraitAddPsionics
     psionicPowers:

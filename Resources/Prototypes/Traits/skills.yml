@@ -254,7 +254,7 @@
 - type: trait
   id: NaturalTelepath
   category: Mental
-  points: -2
+  points: -1
   functions:
     - !type:TraitAddPsionics
       psionicPowers:

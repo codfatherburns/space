@@ -253,7 +253,7 @@
 - type: trait
   id: DispelPower
   category: Mental
-  points: -4
+  points: -1
   requirements:
     - !type:CharacterLogicOrRequirement
       requirements:
@@ -286,7 +286,7 @@
 - type: trait
   id: MetapsionicPower
   category: Mental
-  points: -2
+  points: 0
   requirements:
     - !type:CharacterLogicOrRequirement
       requirements:
