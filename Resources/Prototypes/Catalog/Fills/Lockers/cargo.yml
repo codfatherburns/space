@@ -30,6 +30,7 @@
         prob: 0.2
       - id: LunchboxLogisticsFilledRandom # DeltaV - Lunchboxes!
         prob: 0.3
+      - id: PinpointerStation # Claw Command
 
 - type: entity
   id: LockerSalvageSpecialistFilled
@@ -60,3 +61,4 @@
         prob: 0.2
       - id: LunchboxLogisticsFilledRandom # DeltaV - Lunchboxes!
         prob: 0.3
+      - id: PinpointerStation # Claw Command
