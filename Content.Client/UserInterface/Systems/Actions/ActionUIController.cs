@@ -458,7 +458,9 @@ public sealed class ActionUIController : UIController, IOnStateChanged<GameplayS
                 if (page[i] == actionId)
                 {
                     page[i] = null;
-                    (_container.GetChild(i) as ActionButton)?.ClearData();
+                    var button = _container.GetChild(i) as ActionButton;
++                   if (button != null && button.ActionId == actionId)
++                        button.ClearData();
                 }
             }
         }
