@@ -12,19 +12,19 @@ public sealed class CodeBlueSecretSystem : EntitySystem
     [Dependency] private readonly GameTicker _ticker = default!;
     [Dependency] private readonly AlertLevelSystem _alertLevelSystem = default!;
 
-    private TimeSpan _acoDelay = TimeSpan.FromMinutes(5);
+    private float _acoDelay = 300;
     private bool _ran = false;
     public override void Initialize()
     {
         base.Initialize();
     }
+    private float _timePassed = 0;
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-
-        var currentTime = _ticker.RoundDuration(); // Caching to reduce redundant calls
-        if (_ran || currentTime < _acoDelay) // Avoid timing issues. No need to run before _acoDelay is reached anyways.
+        _timePassed += frameTime;
+        if (_ran || _timePassed < _acoDelay) // Avoid timing issues. No need to run before _acoDelay is reached anyways.
             return;
         _ran = true;
         if (_ticker.IsGameRuleAdded<SecretRuleComponent>())

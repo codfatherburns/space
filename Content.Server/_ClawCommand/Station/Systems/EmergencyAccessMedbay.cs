@@ -24,26 +24,30 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly AirlockSystem _airlockSystem = default!;
     [Dependency] private readonly AccessReaderSystem _accessReaderSystem = default!;
+    [Dependency] protected readonly ILogManager _logManager = default!;
+
+    public ISawmill _sawmill { get; private set; } = default!;
 
     private bool _eaEnabled = true;
-    private TimeSpan _acoDelay = TimeSpan.FromMinutes(10);
+    private float _acoDelay = 600;
     private int _maxDoctorsForEA = 1;
 
     public override void Initialize()
     {
+        _sawmill = _logManager.GetSawmill("fullscreen");
 
         SubscribeLocalEvent<EmergencyAccessMedbayStateComponent, PlayerJobAddedEvent>(OnPlayerJobAdded);
         SubscribeLocalEvent<EmergencyAccessMedbayStateComponent, PlayerJobsRemovedEvent>(OnPlayerJobsRemoved);
 
         base.Initialize();
     }
+    private float _timePassed = 0;
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-
-        var currentTime = _ticker.RoundDuration(); // Caching to reduce redundant calls
-        if (currentTime < _acoDelay) // Avoid timing issues. No need to run before _acoDelay is reached anyways.
+        _timePassed += frameTime;
+        if (_timePassed < _acoDelay) // Avoid timing issues. No need to run before _acoDelay is reached anyways.
             return;
 
 
@@ -52,7 +56,7 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
         {
 
             if (captainState.DoctorCount <= _maxDoctorsForEA)
-                HandleNoDoctors(station, captainState, currentTime);
+                HandleNoDoctors(station, captainState, _timePassed);
             else
             {
                 if (captainState.IsAAInPlay)
@@ -117,7 +121,7 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
     /// </summary>
     /// <param name="station"></param>
     /// <param name="EmergencyAccessMedbayState"></param>
-    private void HandleNoDoctors(Entity<EmergencyAccessMedbayStateComponent?> station, EmergencyAccessMedbayStateComponent captainState, TimeSpan currentTime)
+    private void HandleNoDoctors(Entity<EmergencyAccessMedbayStateComponent?> station, EmergencyAccessMedbayStateComponent captainState, float currentTime)
     {
 
         if (CheckUnlockAA(captainState, currentTime))
@@ -150,7 +154,7 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
     /// </summary>
     /// <param name="EmergencyAccessMedbayState"></param>
     /// <returns>True if conditions are met for AA to be unlocked, False otherwise</returns>
-    private bool CheckUnlockAA(EmergencyAccessMedbayStateComponent captainState, TimeSpan? currentTime)
+    private bool CheckUnlockAA(EmergencyAccessMedbayStateComponent captainState, float? currentTime)
     {
         if (captainState.IsAAInPlay || !_eaEnabled)
             return false;
