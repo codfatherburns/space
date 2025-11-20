@@ -18,15 +18,6 @@
       id: LoadoutClothingBlueshieldMaidDuraVest
 
 - type: characterItemGroup
-  id: LoadoutBlueshieldMaidWeapons
-  maxItems: 1
-  items:
-    - type: loadout
-      id: LoadoutClothingBlueshieldMaidRevolver
-    - type: loadout
-      id: LoadoutClothingBlueshieldMaidKatanas
-
-- type: characterItemGroup
   id: LoadoutBlueshieldMaidUniforms
   maxItems: 1
   items:

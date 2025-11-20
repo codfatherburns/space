@@ -22,13 +22,14 @@
 # Equipment
 - type: loadout
   id: LoadoutMartialArtsBlueshieldCQC
-  category: JobsCommandBlueshieldOfficer
+  category: JobsSecurityWeapons
   cost: 10
   exclusive: true
   requirements:
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        - BlueshieldMaid
   items:
     - BSOManual
 
