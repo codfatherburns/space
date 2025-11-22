@@ -22,7 +22,7 @@
 - type: loadout
   id: LoadoutClothingBlueshieldMaidRevolver
   category: JobsSecurityWeapons
-  cost: 2
+  cost: 0
   exclusive: true
   requirements:
     - !type:CharacterJobRequirement
@@ -34,7 +34,7 @@
 - type: loadout
   id: LoadoutClothingBlueshieldMaidKatanas
   category: JobsSecurityWeapons
-  cost: 2
+  cost: 0
   exclusive: true
   requirements:
     - !type:CharacterJobRequirement
