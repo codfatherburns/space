@@ -67,6 +67,6 @@
   description: uplink-holo-cigar-desc
   productEntity: HoloCigar
   cost:
-    Telecrystal: 4 # I dunno how to balance it
+    Telecrystal: 8 # I dunno how to balance it
   categories:
   - UplinkWearables

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+// Stolen from Goobstation
+
 using Robust.Shared.Audio;
 
 namespace Content.Shared.TheManWhoSoldTheWorld;

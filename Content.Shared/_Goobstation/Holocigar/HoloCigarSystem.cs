@@ -1,4 +1,5 @@
-// Inspiration from Goob, coded by DeKwadrat22 with copious amount of help (FE4R helped mentally)
+// Based from Goob, had to be scrapped and remade, coded by DeKwadrat22
+// with copious amount of help (FE4R helped mentally)
 
 using Content.Shared.TheManWhoSoldTheWorld;
 using Content.Shared.NoWieldNeeded;
@@ -26,7 +27,7 @@ using Robust.Shared.Log;
 namespace Content.Shared.HoloCigar;
 
 /// <summary>
-/// This is the system for the Holo-Cigar. - pure unadulterated shitcode below beware
+/// This is the system for the Holo-Cigar. Beware, polish coding below.
 /// </summary>
 public sealed class HoloCigarSystem : EntitySystem
 {
@@ -153,9 +154,10 @@ public sealed class HoloCigarSystem : EntitySystem
         affected.GunOwner = ent.Owner;
 
         // Track whether this gun originally required wielding so we can restore it later.
+        // Who needs to wield shotgun anyway? Surely badasses don't.
         affected.WasOriginallyGunRequiresWield = HasComp<GunRequiresWieldComponent>(args.Item);
 
-        // If the wearer already has a holo-cigar equipped and it's lit, remove the wield requirement now.
+        // If the wearer is big boss already, remove the wield requirement.
         if (ent.Comp.HoloCigarEntity is not null &&
             TryComp<HoloCigarComponent>(ent.Comp.HoloCigarEntity, out var holo) &&
             holo.Lit &&
@@ -165,7 +167,7 @@ public sealed class HoloCigarSystem : EntitySystem
         }
 
         _gun.RefreshModifiers(args.Item);
-        // If the wearer currently has a lit holo-cigar, reevaluate hand multishot pairing so
+        // If the wearer is big boss, reevaluate hand multishot pairing so
         // newly picked-up guns in hands get paired immediately.
         var wasLit = false;
         if (ent.Comp.HoloCigarEntity is not null && TryComp<HoloCigarComponent>(ent.Comp.HoloCigarEntity, out var holoComp))
@@ -183,7 +185,7 @@ public sealed class HoloCigarSystem : EntitySystem
 
     private void OnEntGotInsertedIntoContainer(EntityUid uid, HoloCigarAffectedGunComponent component, EntGotInsertedIntoContainerMessage args)
     {
-        // If the item was inserted into a container owned by the wearer who has a lit holo-cigar,
+        // If the item was inserted into a container owned by the big boss,
         // re-evaluate hand pairing now that the item is actually in hands.
         var owner = args.Container.Owner;
         if (TryComp<TheManWhoSoldTheWorldComponent>(owner, out var manComp) &&
@@ -226,7 +228,7 @@ public sealed class HoloCigarSystem : EntitySystem
         if (!_net.IsServer) // mary copium right here
             return;
 
-        // Find the wearer (TheManWhoSoldTheWorld) who has this cigar equipped.
+        // Find the big boss.
         EntityUid? wearer = null;
         var manQuery = EntityQueryEnumerator<TheManWhoSoldTheWorldComponent>();
         while (manQuery.MoveNext(out var man, out var manComp))
@@ -251,7 +253,7 @@ public sealed class HoloCigarSystem : EntitySystem
 
                 if (newLit)
                 {
-                    // Turning the cigar on: record original and remove wield requirement if present.
+                    // Becoming big boss: record original and remove wield requirement if present.
                     if (HasComp<GunRequiresWieldComponent>(gun))
                     {
                         comp.WasOriginallyGunRequiresWield = true;
@@ -264,7 +266,7 @@ public sealed class HoloCigarSystem : EntitySystem
                 }
                 else
                 {
-                    // Turning the cigar off: restore wield requirement if it was originally present.
+                    // Stopping being big boss: restore wield requirement if it was originally present.
                     if (comp.WasOriginallyGunRequiresWield)
                     {
                         EnsureComp<GunRequiresWieldComponent>(gun);
@@ -404,3 +406,5 @@ public sealed class HoloCigarSystem : EntitySystem
 
     #endregion
 }
+// So you actually read all of this shitcode? Congrats, you are a true masochist.
+// Now, go grab holo-cigar and become big boss.
