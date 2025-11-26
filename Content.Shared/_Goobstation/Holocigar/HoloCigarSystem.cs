@@ -1,17 +1,8 @@
-// SPDX-FileCopyrightText: 2025 August Eymann <august.eymann@gmail.com>
-// SPDX-FileCopyrightText: 2025 Bandit <queenjess521@gmail.com>
-// SPDX-FileCopyrightText: 2025 GoobBot <uristmchands@proton.me>
-// SPDX-FileCopyrightText: 2025 Solstice <solsticeofthewinter@gmail.com>
-// SPDX-FileCopyrightText: 2025 SolsticeOfTheWinter <solsticeofthewinter@gmail.com>
-// SPDX-FileCopyrightText: 2025 Ted Lukin <66275205+pheenty@users.noreply.github.com>
-// SPDX-FileCopyrightText: 2025 gus <august.eymann@gmail.com>
-// SPDX-FileCopyrightText: 2025 pheenty <fedorlukin2006@gmail.com>
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// Inspiration from Goob, coded by DeKwadrat22 with copious amount of help (FE4R helped mentally)
 
 using Content.Shared.TheManWhoSoldTheWorld;
-using Content.Shared.Multishot;
 using Content.Shared.NoWieldNeeded;
+using Content.Shared.Multishot;
 
 using Content.Shared.Clothing.Components;
 using Content.Shared.Clothing.EntitySystems;
@@ -29,6 +20,8 @@ using Robust.Shared.GameStates;
 using Robust.Shared.Network;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
+using Robust.Shared.Containers;
+using Robust.Shared.Log;
 
 namespace Content.Shared.HoloCigar;
 
@@ -41,10 +34,13 @@ public sealed class HoloCigarSystem : EntitySystem
     [Dependency] private readonly ClothingSystem _clothing = default!;
     [Dependency] private readonly SharedItemSystem _items = default!;
     [Dependency] private readonly SharedGunSystem _gun = default!;
+    [Dependency] private readonly MultishotSystem _multishot = default!;
+    [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
     [Dependency] private readonly IGameTiming _gameTiming = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly INetManager _net = default!;
     [Dependency] private readonly InventorySystem _inventory = default!;
+    private ISawmill _sawmill = default!;
 
     private const string LitPrefix = "lit";
     private const string UnlitPrefix = "unlit";
@@ -56,12 +52,16 @@ public sealed class HoloCigarSystem : EntitySystem
         SubscribeLocalEvent<HoloCigarComponent, GetVerbsEvent<AlternativeVerb>>(OnAddInteractVerb);
         SubscribeLocalEvent<HoloCigarComponent, ComponentHandleState>(OnComponentHandleState);
 
-//        SubscribeLocalEvent<HoloCigarAffectedGunComponent, DroppedEvent>(OnDroppedEvent);
+        SubscribeLocalEvent<HoloCigarAffectedGunComponent, DroppedEvent>(OnDroppedEvent);
+        SubscribeLocalEvent<HoloCigarAffectedGunComponent, EntGotInsertedIntoContainerMessage>(OnEntGotInsertedIntoContainer);
+        SubscribeLocalEvent<HoloCigarAffectedGunComponent, EntGotRemovedFromContainerMessage>(OnEntGotRemovedFromContainer);
 
         SubscribeLocalEvent<TheManWhoSoldTheWorldComponent, PickupAttemptEvent>(OnPickupAttempt);
         SubscribeLocalEvent<TheManWhoSoldTheWorldComponent, MapInitEvent>(OnMapInitEvent);
         SubscribeLocalEvent<TheManWhoSoldTheWorldComponent, ComponentShutdown>(OnComponentShutdown);
         SubscribeLocalEvent<TheManWhoSoldTheWorldComponent, MobStateChangedEvent>(OnMobStateChangedEvent);
+
+        _sawmill = Logger.GetSawmill("holocigar");
     }
 
     private void OnAddInteractVerb(Entity<HoloCigarComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
@@ -152,24 +152,60 @@ public sealed class HoloCigarSystem : EntitySystem
         var affected = EnsureComp<HoloCigarAffectedGunComponent>(args.Item);
         affected.GunOwner = ent.Owner;
 
-        if (TryComp<MultishotComponent>(args.Item, out var multi))
+        // Track whether this gun originally required wielding so we can restore it later.
+        affected.WasOriginallyGunRequiresWield = HasComp<GunRequiresWieldComponent>(args.Item);
+
+        // If the wearer already has a holo-cigar equipped and it's lit, remove the wield requirement now.
+        if (ent.Comp.HoloCigarEntity is not null &&
+            TryComp<HoloCigarComponent>(ent.Comp.HoloCigarEntity, out var holo) &&
+            holo.Lit &&
+            HasComp<GunRequiresWieldComponent>(args.Item))
         {
-            affected.WasOriginallyMultishot = true;
-            affected.OriginalMissChance = multi.MissChance;
-            affected.OriginalSpreadModifier = multi.SpreadMultiplier;
-            affected.OriginalSpreadAddition = multi.SpreadAddition;
-            affected.OriginalHandDamageAmount = multi.HandDamageAmount; // We don't care about the type though
-            affected.OriginalStaminaDamage = multi.StaminaDamage;
+            RemComp<GunRequiresWieldComponent>(args.Item);
         }
 
-        multi = EnsureComp<MultishotComponent>(args.Item);
-        multi.MissChance = 0f;
-        multi.SpreadMultiplier = 1f; // no extra spread chuds
-        multi.SpreadAddition = 0f;
-        multi.HandDamageAmount = 0f;
-        multi.StaminaDamage = 0f;
-
         _gun.RefreshModifiers(args.Item);
+        // If the wearer currently has a lit holo-cigar, reevaluate hand multishot pairing so
+        // newly picked-up guns in hands get paired immediately.
+        var wasLit = false;
+        if (ent.Comp.HoloCigarEntity is not null && TryComp<HoloCigarComponent>(ent.Comp.HoloCigarEntity, out var holoComp))
+        {
+            wasLit = holoComp.Lit;
+        }
+
+        if (wasLit)
+        {
+            // PickupAttempt runs before the item is actually inserted into the hand container.
+            // Defer re-evaluation until the entity is inserted into the container (see OnEntGotInsertedIntoContainer).
+            ReevaluateHandMultishot(ent.Owner);
+        }
+    }
+
+    private void OnEntGotInsertedIntoContainer(EntityUid uid, HoloCigarAffectedGunComponent component, EntGotInsertedIntoContainerMessage args)
+    {
+        // If the item was inserted into a container owned by the wearer who has a lit holo-cigar,
+        // re-evaluate hand pairing now that the item is actually in hands.
+        var owner = args.Container.Owner;
+        if (TryComp<TheManWhoSoldTheWorldComponent>(owner, out var manComp) &&
+            manComp.HoloCigarEntity is not null && TryComp<HoloCigarComponent>(manComp.HoloCigarEntity, out var holo) &&
+            holo.Lit)
+        {
+            _sawmill.Debug($"Ent {uid} inserted into container owned by {owner}; reeval multishot");
+            ReevaluateHandMultishot(owner);
+        }
+    }
+
+    private void OnEntGotRemovedFromContainer(EntityUid uid, HoloCigarAffectedGunComponent component, EntGotRemovedFromContainerMessage args)
+    {
+        // If the item was removed from a hand container, re-evaluate pairing for the previous owner.
+        var owner = args.Container.Owner;
+        if (TryComp<TheManWhoSoldTheWorldComponent>(owner, out var manComp) &&
+            manComp.HoloCigarEntity is not null && TryComp<HoloCigarComponent>(manComp.HoloCigarEntity, out var holo) &&
+            holo.Lit)
+        {
+            _sawmill.Debug($"Ent {uid} removed from container owned by {owner}; reeval multishot");
+            ReevaluateHandMultishot(owner);
+        }
     }
 
     private void HandleToggle(Entity<HoloCigarComponent> ent,
@@ -189,6 +225,75 @@ public sealed class HoloCigarSystem : EntitySystem
 
         if (!_net.IsServer) // mary copium right here
             return;
+
+        // Find the wearer (TheManWhoSoldTheWorld) who has this cigar equipped.
+        EntityUid? wearer = null;
+        var manQuery = EntityQueryEnumerator<TheManWhoSoldTheWorldComponent>();
+        while (manQuery.MoveNext(out var man, out var manComp))
+        {
+            if (manComp.HoloCigarEntity == ent.Owner)
+            {
+                wearer = man;
+                break;
+            }
+        }
+
+        // If there is a wearer, iterate all affected guns and add/remove the GunRequiresWield component
+        // depending on whether we're turning the cigar on (newLit == true) or off.
+        if (wearer is not null)
+        {
+            var newLit = !ent.Comp.Lit; // ent.Comp.Lit is the current state; newLit is the state after toggle
+            var gunQuery = EntityQueryEnumerator<HoloCigarAffectedGunComponent>();
+            while (gunQuery.MoveNext(out var gun, out var comp))
+            {
+                if (comp.GunOwner != wearer)
+                    continue;
+
+                if (newLit)
+                {
+                    // Turning the cigar on: record original and remove wield requirement if present.
+                    if (HasComp<GunRequiresWieldComponent>(gun))
+                    {
+                        comp.WasOriginallyGunRequiresWield = true;
+                        RemComp<GunRequiresWieldComponent>(gun);
+                    }
+                    else
+                    {
+                        comp.WasOriginallyGunRequiresWield = false;
+                    }
+                }
+                else
+                {
+                    // Turning the cigar off: restore wield requirement if it was originally present.
+                    if (comp.WasOriginallyGunRequiresWield)
+                    {
+                        EnsureComp<GunRequiresWieldComponent>(gun);
+                    }
+                }
+            }
+
+            // Handle multishot pairing
+            if (newLit)
+            {
+                // When lighting, only pair guns that are in the wearer's hands.
+                ReevaluateHandMultishot(wearer.Value);
+            }
+            else
+            {
+                // Turning the cigar off: unpair all multishot weapons
+                var unpairedQuery = EntityQueryEnumerator<HoloCigarAffectedGunComponent>();
+                while (unpairedQuery.MoveNext(out var gun, out var comp))
+                {
+                    if (comp.GunOwner != wearer)
+                        continue;
+
+                    if (HasComp<MultishotComponent>(gun))
+                    {
+                        _multishot.UnpairWeapon(gun);
+                    }
+                }
+            }
+        }
 
         if (ent.Comp.Lit == false)
         {
@@ -219,31 +324,82 @@ public sealed class HoloCigarSystem : EntitySystem
 
     #region Helper Methods
 
-    private void RestoreGun(EntityUid gun,
-        HoloCigarAffectedGunComponent? cigarAffectedGunComponent = null,
-        MultishotComponent? multiShotComp = null)
+    private void ReevaluateHandMultishot(EntityUid wearer)
     {
-        if (!Resolve(gun, ref cigarAffectedGunComponent, ref multiShotComp))
+        if (!Exists(wearer))
             return;
-
-        switch (cigarAffectedGunComponent.WasOriginallyMultishot)
+        // Collect guns currently in hands
+        var handGuns = new List<EntityUid>();
+        _sawmill.Debug($"Reevaluating hand multishot for wearer {wearer}");
+        if (TryComp(wearer, out Content.Shared.Hands.Components.HandsComponent? handsComp))
         {
-            case false:
-                RemComp<MultishotComponent>(gun);
-                break;
-            case true:
+            foreach (var hand in handsComp.Hands.Values)
             {
-                multiShotComp.MissChance = cigarAffectedGunComponent.OriginalMissChance;
-                multiShotComp.SpreadMultiplier = cigarAffectedGunComponent.OriginalSpreadModifier;
-                multiShotComp.SpreadAddition = cigarAffectedGunComponent.OriginalSpreadAddition;
-                multiShotComp.HandDamageAmount = cigarAffectedGunComponent.OriginalHandDamageAmount;
-                multiShotComp.StaminaDamage = cigarAffectedGunComponent.OriginalStaminaDamage;
-                break;
+                var held = hand.HeldEntity;
+                if (held is null)
+                    continue;
+
+                if (!Exists(held.Value) || !HasComp<GunComponent>(held.Value))
+                    continue;
+
+                handGuns.Add(held.Value);
+                _sawmill.Debug($"Found gun in hand: {held.Value}");
+
+                // Ensure the affected-gun component exists for proper tracking
+                var affected = EnsureComp<HoloCigarAffectedGunComponent>(held.Value);
+                affected.GunOwner = wearer;
+
+                // Remove wield requirement immediately
+                if (HasComp<GunRequiresWieldComponent>(held.Value))
+                {
+                    affected.WasOriginallyGunRequiresWield = true;
+                    RemComp<GunRequiresWieldComponent>(held.Value);
+                }
             }
         }
 
+        // Unpair any multishot guns owned by wearer that are not in hands
+        var query = EntityQueryEnumerator<HoloCigarAffectedGunComponent>();
+        while (query.MoveNext(out var gun, out var comp))
+        {
+            if (comp.GunOwner != wearer)
+                continue;
+
+            if (!handGuns.Contains(gun) && HasComp<MultishotComponent>(gun))
+            {
+                _sawmill.Debug($"Unpairing gun not in hands: {gun}");
+                _multishot.UnpairWeapon(gun);
+            }
+        }
+
+        // Pair weapons in hands in sequence (1+2, 3+4, ...)
+        for (int i = 0; i < handGuns.Count - 1; i += 2)
+        {
+            var gun1 = handGuns[i];
+            var gun2 = handGuns[i + 1];
+            _multishot.PairWeapons(gun1, gun2, wearer);
+        }
+    }
+
+    private void RestoreGun(EntityUid gun,
+        HoloCigarAffectedGunComponent? cigarAffectedGunComponent = null)
+    {
+        if (!Resolve(gun, ref cigarAffectedGunComponent))
+            return;
+
+        // Restore wield requirement if the gun originally required wielding.
+        if (cigarAffectedGunComponent.WasOriginallyGunRequiresWield)
+        {
+            EnsureComp<GunRequiresWieldComponent>(gun);
+        }
+
+        // Unpair multishot if this weapon is currently paired
+        if (HasComp<MultishotComponent>(gun))
+        {
+            _multishot.UnpairWeapon(gun);
+        }
+
         RemComp<HoloCigarAffectedGunComponent>(gun);
-        _gun.RefreshModifiers(gun);
     }
 
     #endregion

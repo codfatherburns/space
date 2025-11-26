@@ -19,20 +19,17 @@ public sealed partial class HoloCigarAffectedGunComponent : Component
     public EntityUid GunOwner = EntityUid.Invalid;
 
     [ViewVariables]
+    public bool WasOriginallyGunRequiresWield = false;
+
+    /// <summary>
+    /// Whether this gun was originally part of a multishot pair (tracked for unppairing on cigar deactivation).
+    /// </summary>
+    [ViewVariables]
     public bool WasOriginallyMultishot = false;
 
+    /// <summary>
+    /// The weapon this gun was paired with when multishot was active (null if not paired).
+    /// </summary>
     [ViewVariables]
-    public float OriginalMissChance;
-
-    [ViewVariables]
-    public float OriginalSpreadModifier;
-
-    [ViewVariables]
-    public float OriginalSpreadAddition;
-
-    [ViewVariables]
-    public float OriginalHandDamageAmount;
-
-    [ViewVariables]
-    public float OriginalStaminaDamage;
+    public EntityUid? OriginalMultishotPair = null;
 }
