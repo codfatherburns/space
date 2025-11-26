@@ -23,14 +23,7 @@
   - !type:AddComponentSpecial
     components:
       - type: AnomalyJob
-      - type: Clumsy
-        ClumsyDefaultCheck: 1
-        gunShootFailDamage:
-          types:
-            Blunt: 5
-            Piercing: 4
-          groups:
-            Burn: 3
+      - type: Pacified
 
 - type: startingGear
   id: AnomalyGear

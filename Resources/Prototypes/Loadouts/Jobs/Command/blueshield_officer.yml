@@ -22,13 +22,15 @@
 # Equipment
 - type: loadout
   id: LoadoutMartialArtsBlueshieldCQC
-  category: JobsCommandBlueshieldOfficer
-  cost: 10
+  category: JobsSecurityWeapons
+  cost: 8
   exclusive: true
   requirements:
     - !type:CharacterJobRequirement
       jobs:
         - BlueshieldOfficer
+        #kitty doesnt go brr.
+        #- BlueshieldMaid
   items:
     - BSOManual
 

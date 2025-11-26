@@ -69,7 +69,7 @@
   - TechDiskComputerCircuitboard
   - ReverseEngineeringMachineCircuitboard #DeltaV
   # Goobstation R&D Console rework start
-  position: -2,2
+  position: -1,-1
   technologyPrerequisites:
   - BasicRobotics
   # Goobstation R&D Console rework end

@@ -33,6 +33,10 @@ public sealed class CodeBlueSecretStateSystem : EntitySystem
             _latestRound = _ticker.RoundId;
             _isAutoCodeBlueInPlay = false;
         }
+        if (_isAutoCodeBlueInPlay)
+        {
+            return;
+        }
         if (_ticker.IsGameRuleAdded<SecretRuleComponent>())
         {
 
@@ -40,10 +44,6 @@ public sealed class CodeBlueSecretStateSystem : EntitySystem
             while (query.MoveNext(out var station, out var c))
             {
 
-                if (_isAutoCodeBlueInPlay)
-                {
-                    continue;
-                }
 
                 _isAutoCodeBlueInPlay = true;
                 if (_alertLevelSystem.GetLevel(station) == "green")

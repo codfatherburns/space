@@ -29,7 +29,7 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
     public ISawmill _sawmill { get; private set; } = default!;
 
     private TimeSpan _acoDelay = TimeSpan.FromMinutes(10);
-    private int _maxDoctorsForEA = 1;
+    private int _maxDoctorsForEA = 2;
     private bool _isAAInPlay = false;
     private int _doctorCount = 0;
     private int _latestRound = 0;
@@ -61,16 +61,15 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
         {
 
             if (_doctorCount <= _maxDoctorsForEA)
-                HandleNoDoctors(station, captainState, timePassed);
-            else
             {
-                if (_isAAInPlay)
+                if (!_isAAInPlay)
                 {
-                    _isAAInPlay = false;
-                    _chat.DispatchStationAnnouncement(station, Loc.GetString("doctors-arrived-revoke-aco-announcement"), colorOverride: Color.Yellow);
+                    _isAAInPlay = true;
+                    _chat.DispatchStationAnnouncement(station, Loc.GetString("no-doctors-aa-unlocked-announcement"), colorOverride: Color.Yellow);
 
-                    var qquery = EntityQueryEnumerator<AirlockComponent>();
-                    while (qquery.MoveNext(out var airlockID, out var airlockComp))
+                    // Extend access of spare id lockers to command so they can access emergency AA
+                    var query2 = EntityQueryEnumerator<AirlockComponent>();
+                    while (query2.MoveNext(out var airlockID, out var airlockComp))
                     {
 
                         if (_accessReaderSystem.GetMainAccessReader(airlockID, out var mainReader))
@@ -79,13 +78,38 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
                             if (mainReader.AccessLists.Any(list => list.Contains("Medical")))
                             {
 
-                                _airlockSystem.SetEmergencyAccess((airlockID, airlockComp), false);
+                                _airlockSystem.SetEmergencyAccess((airlockID, airlockComp), true);
                             }
                         }
 
                     }
                 }
             }
+            else if (_isAAInPlay)
+            {
+
+
+                _isAAInPlay = false;
+                _chat.DispatchStationAnnouncement(station, Loc.GetString("doctors-arrived-revoke-aco-announcement"), colorOverride: Color.Yellow);
+
+                var qquery = EntityQueryEnumerator<AirlockComponent>();
+                while (qquery.MoveNext(out var airlockID, out var airlockComp))
+                {
+
+                    if (_accessReaderSystem.GetMainAccessReader(airlockID, out var mainReader))
+                    {
+
+                        if (mainReader.AccessLists.Any(list => list.Contains("Medical")))
+                        {
+
+                            _airlockSystem.SetEmergencyAccess((airlockID, airlockComp), false);
+                        }
+                    }
+
+                }
+
+            }
+
         }
     }
 
@@ -102,67 +126,20 @@ public sealed class EmergencyAccessMedbayStateSystem : EntitySystem
 
     private void OnPlayerJobsRemoved(Entity<EmergencyAccessMedbayStateComponent> ent, ref PlayerJobsRemovedEvent args)
     {
-        if (!TryComp<StationJobsComponent>(ent, out var stationJobs))
-            return;
-        if (!args.PlayerJobs.Contains("ChiefMedicalOfficer") ||
-        !args.PlayerJobs.Contains("MedicalDoctor") ||
-        !args.PlayerJobs.Contains("Chemist") ||
-        !args.PlayerJobs.Contains("Paramedic")) // If the player that left was a captain we need to check if there are any captains left
-            return;
-        if (stationJobs.PlayerJobs.Any(playerJobs => playerJobs.Value.Contains("ChiefMedicalOfficer")) ||
-        stationJobs.PlayerJobs.Any(playerJobs => playerJobs.Value.Contains("MedicalDoctor")) ||
-       stationJobs.PlayerJobs.Any(playerJobs => playerJobs.Value.Contains("Chemist")) ||
-       stationJobs.PlayerJobs.Any(playerJobs => playerJobs.Value.Contains("Paramedic"))
-       ) // We check the PlayerJobs if there are any cpatins left
-            return;
-        _doctorCount -= 1;
-        if (_doctorCount < 0)
-            _doctorCount = 0;
-    }
-
-
-    /// <summary>
-    /// Handles cases for when there is no captain
-    /// </summary>
-    /// <param name="station"></param>
-    /// <param name="EmergencyAccessMedbayState"></param>
-    private void HandleNoDoctors(Entity<EmergencyAccessMedbayStateComponent?> station, EmergencyAccessMedbayStateComponent captainState, TimeSpan currentTime)
-    {
-
-        if (CheckUnlockAA(captainState, currentTime))
+        foreach (var job in args.PlayerJobs)
         {
-            _isAAInPlay = true;
-            _chat.DispatchStationAnnouncement(station, Loc.GetString("no-doctors-aa-unlocked-announcement"), colorOverride: Color.Yellow);
-
-            // Extend access of spare id lockers to command so they can access emergency AA
-            var query = EntityQueryEnumerator<AirlockComponent>();
-            while (query.MoveNext(out var airlockID, out var airlockComp))
+            if (job == "ChiefMedicalOfficer" ||
+                    job == "MedicalDoctor" ||
+                     job == "Chemist" ||
+                     job == "Paramedic")
             {
 
-                if (_accessReaderSystem.GetMainAccessReader(airlockID, out var mainReader))
+                _doctorCount -= 1;
+                if (_doctorCount < 0)
                 {
-
-                    if (mainReader.AccessLists.Any(list => list.Contains("Medical")))
-                    {
-
-                        _airlockSystem.SetEmergencyAccess((airlockID, airlockComp), true);
-                    }
+                    _doctorCount = 0;
                 }
-
             }
         }
-    }
-
-    /// <summary>
-    /// Checks the conditions for if AA should be unlocked
-    /// If time is null its condition is ignored
-    /// </summary>
-    /// <param name="EmergencyAccessMedbayState"></param>
-    /// <returns>True if conditions are met for AA to be unlocked, False otherwise</returns>
-    private bool CheckUnlockAA(EmergencyAccessMedbayStateComponent captainState, TimeSpan? currentTime)
-    {
-        if (_isAAInPlay)
-            return false;
-        return currentTime == null || currentTime > _acoDelay;
     }
 }
