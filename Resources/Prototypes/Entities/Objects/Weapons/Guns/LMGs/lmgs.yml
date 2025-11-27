@@ -26,6 +26,8 @@
     selectedMode: FullAuto
     availableModes:
       - FullAuto
+    unwieldOnUse: false
+  - type: GunRequiresWield
     soundGunshot:
       path: /Audio/Weapons/Guns/Gunshots/lmg.ogg
     soundEmpty:
